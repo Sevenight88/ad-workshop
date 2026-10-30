@@ -1,0 +1,88 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://github.com/Sevenight88/ad-workshop/blob/main/meta.schema.json",
+  "title": "AD Workshop 作品元数据",
+  "description": "每件作品放在 items/<type>/<id>/ 下，由三个文件组成：meta.json、item.blueprint，以及可选的 preview.png。这份 schema 只是给人看的参考——真正把关的是 .github/scripts/build_index.py，它坏一件跳过一件。",
+  "type": "object",
+  "required": ["schema", "type", "id", "name", "author", "sha256", "bytes"],
+  "additionalProperties": true,
+  "properties": {
+    "schema": {
+      "const": 1,
+      "description": "格式版本。以后加字段会加号，不加字段不改它。"
+    },
+    "type": {
+      "enum": ["vehicle", "compartment", "plate", "cannon"],
+      "description": "作品类型。必须与所在目录名一致：vehicle / compartment / plate / cannon。"
+    },
+    "id": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{32}$",
+      "description": "内容哈希的前 32 位。算法：剔除 header.name 与 header.creationDate 后序列化整棵 JSON，取 sha256。必须与所在目录名一致。同一辆车换个名字再存，id 不变——这就是「只增不改」的来源。"
+    },
+    "name": {
+      "type": "string",
+      "maxLength": 60,
+      "description": "显示名。可以中文、空格、任意标点；它只进文件名，永远不当路径用。"
+    },
+    "author": {
+      "type": "string",
+      "maxLength": 40,
+      "description": "上传者的 GitHub 用户名（客户端自动填）。"
+    },
+    "desc": {
+      "type": "string",
+      "maxLength": 200
+    },
+    "gameVersion": {
+      "type": ["string", "null"],
+      "description": "蓝图头里记的游戏版本。只有整车有，而且同一份蓝图里可能是 null。"
+    },
+    "format": {
+      "type": ["string", "null"],
+      "enum": ["bp0", "bp1", "bp2", "flat", "wrap", null],
+      "description": "格式族，用来判断兼容性。比 gameVersion 可靠：bp2 带 meshes，flat 是单层对象（板结构／火炮），wrap 是 [{id,data,metaData}]。"
+    },
+    "era": {
+      "type": ["string", "null"],
+      "enum": ["Earlywar", "Midwar", "Latewar", "Modern", null],
+      "description": "年代。只接受游戏自己的四个时代名，其余一律当 null。"
+    },
+    "tags": {
+      "type": "array",
+      "maxItems": 8,
+      "items": { "type": "string", "maxLength": 12 },
+      "description": "最多 8 个，每个 12 字以内。上传时自动做全角转半角、去重、字典序排序。"
+    },
+    "license": {
+      "type": "string",
+      "description": "许可标识，例如 CC-BY-4.0、CC0-1.0、All-Rights-Reserved。"
+    },
+    "created": {
+      "type": "string",
+      "description": "上传日期，yyyy-MM-dd。索引按它倒序排。"
+    },
+    "sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$",
+      "description": "与 id 同一套算法的完整 64 位哈希。客户端下载后会重算一遍比对，对不上就拒绝安装——这是防代理截断的唯一一道关。"
+    },
+    "bytes": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "item.blueprint 的字节数。索引构建时会用磁盘上的真实大小覆盖它。"
+    },
+    "source": {
+      "type": "object",
+      "description": "仅作溯源记录，客户端不读。",
+      "properties": {
+        "faction": { "type": "string" },
+        "file": { "type": "string" }
+      }
+    },
+    "params": {
+      "type": "object",
+      "description": "从蓝图里抽出来的关键数字，只用于列表展示。整车记 parts，舱室记 displacementM3／armourVolumeM3，板结构记 vertexCount／gridSize，火炮记 caliberMm／breechMm。"
+    }
+  }
+}
