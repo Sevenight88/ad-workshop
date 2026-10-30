@@ -1,0 +1,26 @@
+{
+  "schema": 1,
+  "type": "plate",
+  "id": "dd1b5300becbe150d5dd960fe13305e6",
+  "name": "\u706B\u70AE\u5EA7",
+  "author": "Sevenight",
+  "desc": "",
+  "gameVersion": "0.2",
+  "format": "flat",
+  "era": "Interwar",
+  "tags": [
+    "\u6D4B\u8BD5001"
+  ],
+  "license": "MIT",
+  "created": "2026-10-30",
+  "sha256": "dd1b5300becbe150d5dd960fe13305e68ce711ea8deb4efdf057c3ebcb2791b5",
+  "bytes": 433923,
+  "source": {
+    "faction": "Blueprints",
+    "file": "\u706B\u70AE\u5EA7.blueprint"
+  },
+  "params": {
+    "vertexCount": 1299,
+    "gridSize": 1
+  }
+}
