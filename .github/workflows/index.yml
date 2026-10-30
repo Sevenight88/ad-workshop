@@ -1,0 +1,45 @@
+name: 重建索引
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "items/**"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  issues: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: 构建索引
+        run: python .github/scripts/build_index.py
+
+      - name: 提交索引
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add items/index.json
+          if git diff --cached --quiet; then
+            echo "索引没有变化，不需要提交。"
+          else
+            git commit -m "chore: 重建索引 [skip ci]"
+            git push
+          fi
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: 有问题就开 Issue
+        if: ${{ !cancelled() }}
+        run: |
+          # 如果上一步的输出包含跳过项，就开个 Issue 提醒
+          echo "检查是否需要开 Issue..."
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

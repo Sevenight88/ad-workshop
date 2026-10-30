@@ -1,0 +1,34 @@
+name: 校验提交
+
+on:
+  pull_request:
+    paths:
+      - "items/**"
+  push:
+    branches: [main]
+    paths:
+      - "items/**"
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: 校验每件作品
+        run: python .github/scripts/build_index.py
+
+      - name: 检查索引是否同步
+        run: |
+          if [ ! -f items/index.json ]; then
+            echo "::error::items/index.json 不存在"
+            exit 1
+          fi
+          # 如果 index.json 相对于当前 HEAD 有变化，说明提交者忘了重建索引
+          if ! git diff --quiet HEAD -- items/index.json; then
+            echo "::error::items/index.json 与当前提交不一致。请等待 push 后自动重建，或本地运行 python .github/scripts/build_index.py"
+            exit 1
+          fi
