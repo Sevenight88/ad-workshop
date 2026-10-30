@@ -1,0 +1,28 @@
+{
+  "schema": 1,
+  "type": "plate",
+  "id": "4c2b5687b29f049919ae0b697f8bdfe3",
+  "name": "\u7EA2\u5916\u5927\u706F",
+  "author": "Sevenight",
+  "desc": "",
+  "gameVersion": "0.2",
+  "format": "flat",
+  "era": null,
+  "tags": [
+    "\u51B7\u6218",
+    "\u7EA2\u5916",
+    "\u8BBE\u5907"
+  ],
+  "license": "MIT",
+  "created": "2026-10-30",
+  "sha256": "4c2b5687b29f049919ae0b697f8bdfe32536a645597afbf6414481879c776bd8",
+  "bytes": 123491,
+  "source": {
+    "faction": "Blueprints",
+    "file": "\u7EA2\u5916\u5927\u706F.blueprint"
+  },
+  "params": {
+    "vertexCount": 372,
+    "gridSize": 1
+  }
+}
