@@ -18,7 +18,7 @@
    | 项 | 填什么 |
    | --- | --- |
    | 仓库 | `Sevenight88/ad-workshop` |
-   | 令牌 | 一个 fine-grained PAT，权限只要 **Contents: Read and write**，仓库范围只勾这一个 |
+   | 令牌 | 仓库主人自己用：**classic PAT，只勾 `public_repo`**。（fine-grained 也行，但只限主人自己；被邀请来投稿的协作者必须用 classic——GitHub 把「协作者用 fine-grained 写入」列为已知缺口，那条路必然失败。） |
    | API 地址 / 下载地址 | 默认留空即直连 GitHub；大陆连不通时，填自己部署的 Cloudflare Worker 转发地址（部署脚本在 mod 源码的 `worker/` 目录） |
 
    点「保存」，再点「刷新索引」。

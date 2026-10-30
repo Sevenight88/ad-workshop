@@ -85,12 +85,27 @@ def build():
                 issues.append(f"{t}/{id_name}: sha256 格式不对 ({sha[:16]}...)，跳过")
                 continue
 
-            # 用磁盘上的真实大小覆盖 meta 里的 bytes（防止手改）
+            # sha256 是「内容哈希」，语义由 mod 的 Kinds.Hash 定义：摘掉 header.name /
+            # creationDate 后序列化再哈希。它**不等于**文件字节哈希——同一份几何换个名字存，
+            # 字节变了但内容哈希不变，这正是「只增不改」能成立的基础。
+            #
+            # 所以这里不能重算。实测三种写法（ensure_ascii 开关 + 原始字节）都算不出 mod 的值：
+            # Python 复现不了 System.Text.Json 的序列化细节（浮点格式、非 ASCII 转义的大小写、
+            # 数字保留原始文本）。一旦重算并当作跳过条件，结果就是**所有作品全被判为对不上**，
+            # 索引恒为 0 件——线上已经这样空过一次（4 件作品传上去了，列表却什么都没有）。
+            #
+            # 分工：内容哈希由唯一的写入方（mod）定义，CI 只做索引，不当裁判。
+            # 能做的校验是格式、存在性、type/id 与目录一致，都在上面做完了。
             real_bytes = os.path.getsize(blueprint_path)
-            real_sha = check_sha256(blueprint_path)
-            if real_sha != sha:
+            sha_file = check_sha256(blueprint_path)
+
+            # 防手改只防「字节被动过」：mod 以后若在 meta 里附带 sha256File，就拿它比文件字节哈希。
+            # 现在没有这个字段，于是完全不校验——不能拿文件字节哈希去比内容哈希。
+            want_file = meta.get("sha256File")
+            if isinstance(want_file, str) and SHA256_RE.match(want_file) and want_file != sha_file:
                 issues.append(
-                    f"{t}/{id_name}: sha256 对不上（meta={sha[:16]}..., disk={real_sha[:16]}...），跳过"
+                    f"{t}/{id_name}: 文件字节哈希对不上（meta={want_file[:16]}..., "
+                    f"disk={sha_file[:16]}...），跳过"
                 )
                 continue
 
@@ -111,7 +126,9 @@ def build():
                 "era": meta.get("era") or None,
                 "tags": tags,
                 "bytes": real_bytes,
-                "sha256": real_sha,
+                "sha256": sha,
+                # 文件字节哈希，只作留档与人工核查，不参与任何校验判断
+                "sha256File": sha_file,
                 "license": meta.get("license") or None,
                 "created": meta.get("created") or "1970-01-01",
                 "params": meta.get("params") or {},
